@@ -1,12 +1,12 @@
+# Exported from Render on 2025-06-13T06:13:59Z
 services:
-  - type: web
-    name: visitor-server
-    env: docker
-    plan: free
-    repo: https://github.com/rizwank123/visitorServer
-    branch: main
-    dockerContext: .
-    dockerfilePath: Dockerfile
-    envVars:
-      - key: DATABASE_URL
-        value: postgres://postgres:yourpassword@your-db-host:5432/visitor_db
+- type: web
+  name: visitorServer
+  runtime: docker
+  repo: https://github.com/Rizwank123/visitorServer
+  plan: free
+  region: oregon
+  dockerContext: .
+  dockerfilePath: ./Dockerfile
+  autoDeployTrigger: commit
+version: "1"
