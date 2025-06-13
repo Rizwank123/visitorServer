@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -14,7 +15,8 @@ func InitDB() {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	dsn := "postgres://postgres:root@localhost:5433/visitor_db?sslmode=disable"
+	dsn := os.Getenv("DATABASE_URL")
+
 	var err error
 	DB, err = pgxpool.New(ctx, dsn)
 	if err != nil {
