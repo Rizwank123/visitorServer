@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/jackc/pgx/v5"
 )
 
 type Visitor struct {
@@ -21,7 +23,7 @@ type Visitor struct {
 	CountryCodeISO3    string  `json:"country_code_iso3"`
 	CountryCapital     string  `json:"country_capital"`
 	CountryTLD         string  `json:"country_tld"`
-	ContinentCode      string  `json:"continent_code"`
+	ContinentCode      *string `json:"continent_code"`
 	InEU               bool    `json:"in_eu"`
 	Postal             string  `json:"postal"`
 	Latitude           float64 `json:"latitude"`
@@ -29,8 +31,8 @@ type Visitor struct {
 	Timezone           string  `json:"timezone"`
 	UTCOffset          string  `json:"utc_offset"`
 	CountryCallingCode string  `json:"country_calling_code"`
-	Currency           string  `json:"currency"`
-	CurrencyName       string  `json:"currency_name"`
+	Currency           *string `json:"currency"`
+	CurrencyName       *string `json:"currency_name"`
 	Languages          string  `json:"languages"`
 	CountryArea        int     `json:"country_area"`
 	CountryPopulation  int64   `json:"country_population"`
@@ -47,6 +49,17 @@ func AddVisitor(w http.ResponseWriter, r *http.Request) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
+
+	var count int
+	if err := DB.QueryRow(ctx, "SELECT COUNT(*) FROM visitors WHERE ip = $1 AND date_trunc('day', visited_at) = date_trunc('day', NOW())", v.IP).Scan(&count); err != nil {
+		http.Error(w, "DB error", http.StatusInternalServerError)
+		return
+	}
+
+	if count > 0 {
+		w.WriteHeader(http.StatusNotModified)
+		return
+	}
 
 	_, err := DB.Exec(ctx, `
 		INSERT INTO visitors (
@@ -96,20 +109,10 @@ func GetAllVisitors(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	var visitors []Visitor
-
-	for rows.Next() {
-		var v Visitor
-		err := rows.Scan(
-			&v.IP, &v.Network, &v.Version, &v.City, &v.Region, &v.RegionCode, &v.Country, &v.CountryName, &v.CountryCode,
-			&v.CountryCodeISO3, &v.CountryCapital, &v.CountryTLD, &v.ContinentCode, &v.InEU, &v.Postal, &v.Latitude,
-			&v.Longitude, &v.Timezone, &v.UTCOffset, &v.CountryCallingCode, &v.Currency, &v.CurrencyName, &v.Languages,
-			&v.CountryArea, &v.CountryPopulation, &v.ASN, &v.Org,
-		)
-		if err != nil {
-			http.Error(w, "Error scanning row", http.StatusInternalServerError)
-			return
-		}
-		visitors = append(visitors, v)
+	visitors, err = pgx.CollectRows(rows, pgx.RowToStructByName[Visitor])
+	if err != nil {
+		http.Error(w, "DB error", http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")

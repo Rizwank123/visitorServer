@@ -2,3 +2,5 @@ node_modules
 package-lock.json
 launch.json
 .vercel
+__debug_bin*
+.DS_Store
