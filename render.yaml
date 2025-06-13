@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: visitor-server
+    env: docker
+    plan: free
+    repo: https://github.com/rizwank123/visitorServer
+    branch: main
+    dockerContext: .
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        value: postgres://postgres:yourpassword@your-db-host:5432/visitor_db
