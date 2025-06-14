@@ -23,6 +23,9 @@ jobs:
           key: ${{ secrets.STAGING_KEY }}
           script: |
             cd /home/ubuntu/test-server/visitorServer
+            echo "pulling changes from uat branch"
             git pull origin uat
+            echo "Deployed to Staging (UAT) ...."
             docker-compose down
             docker-compose up -d --build
+            echo "Deployed to Staging (UAT) done"
