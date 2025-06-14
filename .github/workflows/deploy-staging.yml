@@ -1,0 +1,31 @@
+name: Deploy to Staging (UAT)
+
+on:
+  push:
+    branches:
+      - uat
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    environment: uat
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ubuntu
+          key: ${{ secrets.STAGING_KEY }}
+          script: |
+            cd /home/ubuntu/test-server/visitorServer
+            echo "pulling changes from uat branch"
+            git pull origin uat
+            echo "Deployed to Staging (UAT) ...."
+            sudo  docker-compose down
+            sudo docker-compose up -d --build
+            echo "Deployed to Staging (UAT) done"
