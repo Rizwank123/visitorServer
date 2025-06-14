@@ -24,6 +24,6 @@ jobs:
           script: |
             cd /home/ubuntu/test-server
             git pull origin uat
-            
+            cd visitorServer
             docker-compose down
             docker-compose up -d --build
