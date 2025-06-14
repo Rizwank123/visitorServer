@@ -9,6 +9,7 @@ jobs:
   deploy:
     name: Deploy to EC2
     runs-on: ubuntu-latest
+    environment: UAT  # 👈 This is the key fix!
 
     steps:
       - name: Checkout Code
@@ -20,21 +21,8 @@ jobs:
           host: ${{ secrets.STAGING_HOST }}
           username: ubuntu
           key: ${{ secrets.STAGING_KEY }}
-          port: 22
           script: |
-            echo "✅ Connected to EC2"
-
-            # Navigate to the app directory
             cd /home/ubuntu/test-server
-
-            # Pull latest code from the uat branch
-            git fetch origin
-            git reset --hard origin/uat
-
-            # Stop and remove existing containers
+            git pull origin uat
             docker compose down
-
-            # Rebuild and start in detached mode
             docker compose up -d --build
-
-            echo "🚀 Deployment complete"
