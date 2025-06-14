@@ -1,0 +1,40 @@
+name: Deploy to Staging (UAT)
+
+on:
+  push:
+    branches:
+      - uat
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ubuntu
+          key: ${{ secrets.STAGING_KEY }}
+          port: 22
+          script: |
+            echo "✅ Connected to EC2"
+
+            # Navigate to the app directory
+            cd /home/ubuntu/test-server
+
+            # Pull latest code from the uat branch
+            git fetch origin
+            git reset --hard origin/uat
+
+            # Stop and remove existing containers
+            docker compose down
+
+            # Rebuild and start in detached mode
+            docker compose up -d --build
+
+            echo "🚀 Deployment complete"
