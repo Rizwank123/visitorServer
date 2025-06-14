@@ -22,8 +22,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.STAGING_KEY }}
           script: |
-            cd /home/ubuntu/test-server
+            cd /home/ubuntu/test-server/visitorServer
             git pull origin uat
-            cd visitorServer
             docker-compose down
             docker-compose up -d --build
