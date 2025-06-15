@@ -17,7 +17,7 @@ services:
   app:
     build:
       context: .
-      target: runner  # 👈 This tells Docker to use the final slim image
+      target: runner
     container_name: visitor_app
     restart: always
     ports:
@@ -34,7 +34,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - app
 

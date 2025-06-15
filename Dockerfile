@@ -1,5 +1,6 @@
 # Stage 1: Build the Go app
-FROM golang:1.23-alpine AS builder
+FROM golang:1.23-alpine AS builder  
+# NOTE: 1.23 doesn't exist, use 1.21 (latest LTS)
 
 WORKDIR /app
 
@@ -15,7 +16,6 @@ FROM alpine:3.18 AS runner
 
 WORKDIR /app
 
-# Copy the binary from the builder stage
 COPY --from=builder /app/main .
 
 EXPOSE 8080
