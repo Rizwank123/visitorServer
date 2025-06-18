@@ -1,31 +1,44 @@
+# ┌──────────────────────────────────────────────────────────────┐
+# │ 🚀 GitHub Actions: Deploy to EC2 (Staging/UAT)              │
+# ├──────────────────────────────────────────────────────────────┤
+# │ 📌 Trigger: Push to `uat` branch                             │
+# │ 🧱 Jobs:                                                     │
+# │   • Checkout code                                            │
+# │   • SSH into EC2 instance                                    │
+# │   • Pull latest from `uat` branch                            │
+# │   • Rebuild and restart Docker containers using Compose      │
+# └──────────────────────────────────────────────────────────────┘
+
 name: Deploy to Staging (UAT)
 
 on:
   push:
     branches:
-      - uat
+      - uat  # ✅ Trigger this workflow when code is pushed to 'uat' branch
 
 jobs:
   deploy:
     name: Deploy to EC2
-    runs-on: ubuntu-latest
-    environment: uat
+    runs-on: ubuntu-latest  # 🏃 GitHub-hosted runner with Ubuntu
+
+    environment: uat  # 🌐 Optional GitHub environment (for tracking/staging secrets)
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4  # 📥 Check out the repository code
 
       - name: Deploy to EC2 via SSH
-        uses: appleboy/ssh-action@v0.1.10
+        uses: appleboy/ssh-action@v0.1.10  # 🔐 SSH into the EC2 instance
         with:
-          host: ${{ secrets.STAGING_HOST }}
-          username: ubuntu
-          key: ${{ secrets.STAGING_KEY }}
+          host: ${{ secrets.STAGING_HOST }}  # 🖥️ EC2 public IP or DNS
+          username: ubuntu                   # 👤 EC2 user (default for Ubuntu AMIs)
+          key: ${{ secrets.STAGING_KEY }}    # 🔑 SSH private key (stored in GitHub Secrets)
           script: |
             cd /home/ubuntu/test-server/visitorServer
-            echo "pulling changes from uat branch"
+            echo "📦 Pulling latest changes from uat branch..."
             git pull origin uat
-            echo "Deployed to Staging (UAT) ...."
-            sudo  docker-compose down
+            echo "🛑 Stopping current containers..."
+            sudo docker-compose down
+            echo "🔄 Rebuilding and starting containers..."
             sudo docker-compose up -d --build
-            echo "Deployed to Staging (UAT) done"
+            echo "✅ Deployment to Staging (UAT) completed."
