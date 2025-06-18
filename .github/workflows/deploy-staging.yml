@@ -1,38 +1,57 @@
-# ┌──────────────────────────────────────────────────────────────┐
-# │ 🚀 GitHub Actions: Deploy to EC2 (Staging/UAT)              │
-# ├──────────────────────────────────────────────────────────────┤
-# │ 📌 Trigger: Push to `uat` branch                             │
-# │ 🧱 Jobs:                                                     │
-# │   • Checkout code                                            │
-# │   • SSH into EC2 instance                                    │
-# │   • Pull latest from `uat` branch                            │
-# │   • Rebuild and restart Docker containers using Compose      │
-# └──────────────────────────────────────────────────────────────┘
+# ┌────────────────────────────────────────────────────────────────────────────┐
+# │ 🧪 GitHub Actions: Test & Deploy to EC2 (Staging/UAT)                      │
+# ├────────────────────────────────────────────────────────────────────────────┤
+# │ 📌 Trigger: Push to `uat` branch                                           │
+# │ 📦 Jobs:                                                                   │
+# │   • Run Go unit/integration tests                                          │
+# │   • Only if tests pass → SSH into EC2 instance                             │
+# │   • Pull latest code from `uat` branch                                     │
+# │   • Rebuild and restart Docker containers using Docker Compose             │
+# │ 📍 Environment: uat                                                        │
+# │ 🔐 Uses GitHub Secrets for EC2 host, user key, etc.                        │
+# └────────────────────────────────────────────────────────────────────────────┘
 
-name: Deploy to Staging (UAT)
+name: Test & Deploy to Staging (UAT)
 
 on:
   push:
     branches:
-      - uat  # ✅ Trigger this workflow when code is pushed to 'uat' branch
+      - uat
 
 jobs:
-  deploy:
-    name: Deploy to EC2
-    runs-on: ubuntu-latest  # 🏃 GitHub-hosted runner with Ubuntu
-
-    environment: uat  # 🌐 Optional GitHub environment (for tracking/staging secrets)
+  test:
+    name: 🧪 Run Go Tests
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4  # 📥 Check out the repository code
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
 
-      - name: Deploy to EC2 via SSH
-        uses: appleboy/ssh-action@v0.1.10  # 🔐 SSH into the EC2 instance
+      - name: ⚙️ Set up Go
+        uses: actions/setup-go@v5
         with:
-          host: ${{ secrets.STAGING_HOST }}  # 🖥️ EC2 public IP or DNS
-          username: ubuntu                   # 👤 EC2 user (default for Ubuntu AMIs)
-          key: ${{ secrets.STAGING_KEY }}    # 🔑 SSH private key (stored in GitHub Secrets)
+          go-version: '1.21' # Use your actual Go version
+
+      - name: 🧪 Run Unit & Integration Tests
+        run: |
+          go test ./... -v
+
+  deploy:
+    name: 🚀 Deploy to EC2 (Staging)
+    needs: test # ✅ Run this only if the 'test' job succeeds
+    runs-on: ubuntu-latest
+    environment: uat
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🔐 Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.STAGING_HOST }}          # 🖥️ EC2 public IP or hostname
+          username: ubuntu                            # 👤 Default user for Ubuntu AMIs
+          key: ${{ secrets.STAGING_KEY }}             # 🔑 SSH private key
           script: |
             cd /home/ubuntu/test-server/visitorServer
             echo "📦 Pulling latest changes from uat branch..."
