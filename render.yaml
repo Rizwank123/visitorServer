@@ -1,12 +1,13 @@
-# Exported from Render on 2025-06-13T06:13:59Z
 services:
-- type: web
-  name: visitorServer
-  runtime: docker
-  repo: https://github.com/Rizwank123/visitorServer
-  plan: free
-  region: oregon
-  dockerContext: .
-  dockerfilePath: ./Dockerfile
-  autoDeployTrigger: commit
-version: "1"
+  - type: web
+    name: visitorServer
+    runtime: docker
+    repo: https://github.com/Rizwank123/visitorServer
+    plan: free
+    region: oregon
+    dockerContext: .
+    dockerfilePath: ./Dockerfile
+    autoDeployTrigger: commit
+    envVars:
+      - key: APP_ENV_FILE
+        value: prod.env

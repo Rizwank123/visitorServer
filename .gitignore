@@ -4,3 +4,6 @@ launch.json
 .vercel
 __debug_bin*
 .DS_Store
+*.env
+prod.env
+.env
