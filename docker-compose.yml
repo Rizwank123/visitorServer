@@ -6,7 +6,7 @@ services:
     container_name: visitor_db
     restart: always
     environment:
-      POSTGRES_USER: ${DB_USER} # or postgres
+      POSTGRES_USER: ${DB_USERNAME} # or postgres
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     env_file:
@@ -27,13 +27,13 @@ services:
     environment:
       DB_HOST: visitorDb
       DB_PORT: ${DB_PORT}
-      DB_USER: ${DB_USER}
+      DB_USER: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
     env_file:
       - .env
     depends_on:
-      - visitorDb
+      - ${DB_HOST}
 
   nginx:
     image: nginx:latest
