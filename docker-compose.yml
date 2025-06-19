@@ -6,11 +6,13 @@ services:
     container_name: visitor_db
     restart: always
     environment:
-      POSTGRES_USER: "postgres" # or postgres
-      POSTGRES_PASSWORD: "root"
-      POSTGRES_DB: "visitor_db"
+      POSTGRES_USER: ${DB_USER} # or postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    env_file:
+      - .env
     ports:
-      - "5432:5432"
+      - ${DB_PORT}:${DB_PORT}
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -23,7 +25,13 @@ services:
     ports:
       - "8080:8080"
     environment:
-      DATABASE_URL: postgres://visitorDb:root@postgres:5432/visitor_db?sslmode=disable
+      DB_HOST: visitorDb
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    env_file:
+      - .env
     depends_on:
       - visitorDb
 

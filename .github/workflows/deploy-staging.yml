@@ -56,8 +56,10 @@ jobs:
             cd /home/ubuntu/test-server/visitorServer
             echo "📦 Pulling latest changes from uat branch..."
             git pull origin uat
+            echo "🔐 Writing .env file from GitHub Secret..."
+            echo "${{ secrets.UAT_ENV }}" | tee .env > /dev/null
             echo "🛑 Stopping current containers..."
-            sudo docker-compose down
-            echo "🔄 Rebuilding and starting containers..."
-            sudo docker-compose up -d --build
+            sudo docker-compose -f docker-compose.yml -f docker-compose.db.yml down
+            echo "🔄 Rebuilding and starting containers with UAT config..."
+            sudo docker-compose -f docker-compose.yml -f docker-compose.db.yml up -d --build
             echo "✅ Deployment to Staging (UAT) completed."
