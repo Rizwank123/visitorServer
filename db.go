@@ -16,10 +16,6 @@ var DB *pgxpool.Pool
 func InitDB() {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
-	//dsn := "postgresql://postgres:root@visitorDb:5432/visitor_db?sslmode=disable"
-	//dsn := "postgresql://visitor_db_bc1r_user:jdFrkJCkR21kPDh4YzBRqmxbcuDHkYMu@dpg-d15s8andiees73een8u0-a/visitor_db_bc1r"
-
-	// Pick which .env file to load based on an ENV value (default to .env)
 	envFile := os.Getenv("APP_ENV_FILE")
 	if envFile == "" {
 		envFile = ".env"
@@ -29,15 +25,7 @@ func InitDB() {
 	if err != nil {
 		log.Printf("Warning: failed to load env file: %s. Reason: %v", envFile, err)
 	}
-	// dsn := "postgresql://"
-	// dsn += os.Getenv("DB_USERNAME") + ":"
-	// dsn += os.Getenv("DB_PASSWORD") + "@"
-	// dsn += os.Getenv("DB_HOST") + ":"
-	// dsn += os.Getenv("DB_PORT") + "/"
-	// dsn += os.Getenv("DB_NAME") + "?sslmode=disable"
 	dsn := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=disable", os.Getenv("DB_USERNAME"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_NAME"))
-
-	//dsn := os.Getenv("DATABASE_URL")
 
 	DB, err = pgxpool.New(ctx, dsn)
 	if err != nil {
