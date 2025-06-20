@@ -1,4 +1,4 @@
-module github.com.rizwank123/visitor
+module github.com/rizwank123/visitorServer
 
 go 1.23.9
 
@@ -7,7 +7,7 @@ require (
 	github.com/go-chi/cors v1.2.1
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/joho/godotenv v1.5.1
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.10.0
 )
 
 require (
