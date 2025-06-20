@@ -3,7 +3,7 @@ setup:
 	@echo "Setting up the Platform"
 	@echo "Generating the .env file"
 	cp sample.env .env
-	@echo "set up the envoironment values"
+	@echo "set up the environment values"
 
 # Setup docker
 docker-setup:
@@ -21,5 +21,4 @@ test:
 # run the app
 run:
 	@echo "Start the Application"
-	go run github.com/Rizwank123/visitorServer
-		
+	go run github.com/rizwank123/visitorServer/
